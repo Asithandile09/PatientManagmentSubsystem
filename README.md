@@ -27,6 +27,9 @@ This project demonstrates a full-featured system for managing patient admissions
 ### Dashboard
 ![Dashboard](screenshots/dashboard.png)
 
+### Dashboard (Extended)
+![Dashboard (Extended)](screenshots/dashboard-ex.png)
+
 ### Patient List
 ![Patient List](screenshots/patient-list.png)
 
