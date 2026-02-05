@@ -1,0 +1,267 @@
+﻿@model IEnumerable<PatientManagmentSubsystem.Models.Patient>
+@{
+    ViewData["Title"] = "Patient Management";
+}
+
+<div class="page-header mb-4">
+    <div class="row align-items-center">
+        <div class="col-md-8">
+            <h2 class="page-title"><i class="bi bi-people-fill"></i> Patient Management</h2>
+            <p class="page-subtitle">Manage hospital patient records efficiently</p>
+        </div>
+        <div class="col-md-4 text-end">
+            <a href="@Url.Action("Create")" class="btn btn-add-patient">
+                <i class="bi bi-plus-circle"></i> Add New Patient
+            </a>
+        </div>
+    </div>
+</div>
+
+@if (Model != null && Model.Any())
+{
+    <!-- Quick stats -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-4">
+            <div class="stat-card total">
+                <i class="bi bi-people"></i>
+                <div>
+                    <h3>@Model.Count()</h3>
+                    <span>Total Patients</span>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stat-card active">
+                <i class="bi bi-person-check-fill"></i>
+                <div>
+                    <h3>@Model.Count(p => p.IsActive)</h3>
+                    <span>Active</span>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stat-card discharged">
+                <i class="bi bi-box-arrow-right"></i>
+                <div>
+                    <h3>@Model.Count(p => !p.IsActive)</h3>
+                    <span>Discharged</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Patient Table -->
+    <div class="card-custom shadow-sm">
+        <div class="card-header-custom">
+            <h5><i class="bi bi-table"></i> Patient List</h5>
+        </div>
+        <div class="table-responsive">
+            <table class="table align-middle">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Patient Name</th>
+                        <th>Gender</th>
+                        <th>Age</th>
+                        <th>Ward</th>
+                        <th>Doctor</th>
+                        <th>Admission Date</th>
+                        <th>Status</th>
+                        <th class="text-center">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var p in Model)
+                    {
+                        <tr>
+                            <td><strong>#@p.PatientId</strong></td>
+                            <td>@p.FirstName @p.LastName</td>
+                            <td>@p.Gender</td>
+                            <td>@((DateTime.Now - p.DOB).Days / 365) yrs</td>
+                            <td>
+                                @if (p.Ward != null)
+                                {
+                                    <span class="badge ward">@p.Ward.Name</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary">Not assigned</span>
+                                }
+                            </td>
+                            <td>
+                                @if (p.Doctor != null)
+                                {
+                                    <span class="badge bg-info text-dark">
+                                         @p.Doctor.FirstName @p.Doctor.LastName
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary">No Doctor</span>
+                                }
+                            </td>
+                            <td>@p.AdmissionDate.ToString("MMM dd, yyyy")</td>
+                            <td>
+                                @if (p.IsActive)
+                                {
+                                    <span class="badge status-active">Active</span>
+                                }
+                                else
+                                {
+                                    <span class="badge status-discharged">Discharged</span>
+                                }
+                            </td>
+                            <td class="text-center">
+                                <a href="@Url.Action("Details", new { id = p.PatientId })" class="btn-action view"><i class="bi bi-folder2"></i></a>
+                                <a href="@Url.Action("Edit", new { id = p.PatientId })" class="btn-action edit"><i class="bi bi-pencil"></i></a>
+                                <form asp-action="SoftDelete" method="post" class="d-inline">
+                                    <input type="hidden" name="id" value="@p.PatientId" />
+                                    <button type="submit" class="btn-action discharge" title="Discharge" onclick="return confirm('Discharge this patient?');">
+                                        <i class="bi bi-box-arrow-right"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}
+else
+{
+    <div class="alert alert-info shadow-sm">
+        <i class="bi bi-info-circle"></i> No patients found. Click <b>Add New Patient</b> to register.
+    </div>
+}
+
+@section Styles {
+    <style>
+        /* Page header */
+        .page-title {
+            font-weight: 700;
+            color: #2c3e50;
+        }
+
+            .page-title i {
+                color: #8B1538;
+            }
+
+        /* Add button */
+        .btn-add-patient {
+            background: linear-gradient(135deg, #8B1538, #B76E79);
+            border: none;
+            color: #fff;
+            padding: 0.6rem 1.3rem;
+            border-radius: 8px;
+            font-weight: 500;
+        }
+
+            .btn-add-patient:hover {
+                opacity: 0.9;
+            }
+
+        /* Stat cards */
+        .stat-card {
+            border-radius: 12px;
+            padding: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            color: #fff;
+        }
+
+            .stat-card i {
+                font-size: 2rem;
+            }
+
+            .stat-card h3 {
+                margin: 0;
+                font-weight: 700;
+            }
+
+            .stat-card.total {
+                background: linear-gradient(135deg, #8B1538, #B76E79);
+            }
+
+            .stat-card.active {
+                background: linear-gradient(135deg, #16a34a, #4ade80);
+            }
+
+            .stat-card.discharged {
+                background: linear-gradient(135deg, #6c757d, #adb5bd);
+            }
+
+        /* Card wrapper */
+        .card-custom {
+            border-radius: 12px;
+            background: #fdfdfd;
+            border: 1px solid #e9ecef;
+        }
+
+        .card-header-custom {
+            background: linear-gradient(135deg, #8B1538, #B76E79);
+            color: white;
+            padding: 0.8rem 1.2rem;
+            border-top-left-radius: 12px;
+            border-top-right-radius: 12px;
+        }
+
+        /* Table */
+        .table thead {
+            background: #f8f9fa;
+        }
+
+            .table thead th {
+                color: #2c3e50;
+                text-transform: uppercase;
+                font-size: 0.85rem;
+            }
+
+        /* Status badges */
+        .badge.ward {
+            background: #4A90A4;
+            color: #fff;
+        }
+
+        .status-active {
+            background: #198754;
+        }
+
+        .status-discharged {
+            background: #6c757d;
+        }
+
+        /* Action buttons */
+        .btn-action {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            border: none;
+            margin: 0 2px;
+            cursor: pointer;
+        }
+
+            .btn-action.view {
+                background: #e7f1ff;
+                color: #0d6efd;
+            }
+
+            .btn-action.edit {
+                background: #fff4e5;
+                color: #d97706;
+            }
+
+            .btn-action.discharge {
+                background: #ffe5e9;
+                color: #8B1538;
+            }
+
+            .btn-action:hover {
+                opacity: 0.85;
+            }
+    </style>
+}

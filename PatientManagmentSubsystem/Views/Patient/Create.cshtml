@@ -1,0 +1,559 @@
+﻿@model PatientManagmentSubsystem.Models.Patient
+
+@{
+    ViewData["Title"] = "Admit New Patient";
+}
+
+<h2 class="mb-4">Admit New Patient</h2>
+
+<form asp-action="Create" method="post">
+    @Html.AntiForgeryToken()
+    <div asp-validation-summary="All" class="text-danger mb-3"></div>
+
+    <div class="row">
+        <!-- LEFT COLUMN ---------------------------------------------------->
+        <div class="col-md-6">
+            <fieldset class="border p-3 mb-4 fieldset-custom">
+                <legend class="w-auto px-2">Personal Information</legend>
+
+                <div class="form-group mb-3">
+                    <label asp-for="FirstName"></label>
+                    <input asp-for="FirstName" class="form-control" />
+                    <span asp-validation-for="FirstName" class="text-danger"></span>
+                </div>
+
+                <div class="form-group mb-3">
+                    <label asp-for="LastName"></label>
+                    <input asp-for="LastName" class="form-control" />
+                    <span asp-validation-for="LastName" class="text-danger"></span>
+                </div>
+
+                <div class="form-group mb-3">
+                    <label asp-for="Gender"></label>
+                    <select asp-for="Gender" class="form-control">
+                        <option value="">-- Select --</option>
+                        <option>Male</option>
+                        <option>Female</option>
+                    </select>
+                    <span asp-validation-for="Gender" class="text-danger"></span>
+                </div>
+
+                <div class="form-group mb-3">
+                    <label asp-for="DOB"></label>
+                    <input asp-for="DOB" type="date" class="form-control" />
+                    <span asp-validation-for="DOB" class="text-danger"></span>
+                </div>
+
+                <div class="form-group mb-3">
+                    <label asp-for="Email"></label>
+                    <input asp-for="Email" type="email" class="form-control" />
+                    <span asp-validation-for="Email" class="text-danger"></span>
+                </div>
+
+                <div class="form-group mb-3">
+                    <label asp-for="Doctor"></label>
+                    <select asp-for="DoctorId" class="form-control" asp-items="ViewBag.Doctors">
+                        <option value="">-- Select Doctor --</option>
+                    </select>
+                    <span asp-validation-for="DoctorId" class="text-danger"></span>
+                </div>
+
+                <div class="form-group mb-3">
+                    <label asp-for="Ward"></label>
+                    <select asp-for="WardId" class="form-control ward-select" asp-items="ViewBag.Wards" onchange="filterBedsByWard()">
+                        <option value="">-- Select Ward --</option>
+                    </select>
+                    <span asp-validation-for="WardId" class="text-danger"></span>
+                </div>
+            </fieldset>
+
+            <fieldset class="border p-3 fieldset-custom">
+                <legend class="w-auto px-2">Address</legend>
+
+                <div class="form-group mb-3">
+                    <label>Street</label>
+                    <input name="address.Street" class="form-control" />
+                </div>
+                <div class="form-group mb-3">
+                    <label>City</label>
+                    <input name="address.City" class="form-control" />
+                </div>
+                <div class="form-group mb-3">
+                    <label>Province</label>
+                    <input name="address.Province" class="form-control" />
+                </div>
+                <div class="form-group mb-3">
+                    <label>Postal Code</label>
+                    <input name="address.PostalCode" class="form-control" />
+                </div>
+                <div class="form-group mb-3">
+                    <label>Country</label>
+                    <input name="address.Country" value="South Africa" class="form-control" />
+                </div>
+            </fieldset>
+        </div>
+
+        <!-- RIGHT COLUMN --------------------------------------------------->
+        <div class="col-md-6">
+            <!-- Bed selection -->
+            <div class="card-custom border-success mb-4">
+                <div class="card-header-custom bg-success text-white">
+                    <i class="bi bi-hospital-fill"></i> Select Available Bed
+                </div>
+                <div class="card-body-custom">
+                    <p class="bed-instruction"><i class="bi bi-info-circle"></i> Select a ward first to view available beds</p>
+                    <div class="row" id="bedContainer">
+                        @foreach (var bed in ViewBag.Beds)
+                        {
+                            var wardColor = "default-ward";
+                            if (bed.Ward != null)
+                            {
+                                wardColor = bed.Ward.Name switch
+                                {
+                                    var name when name.Contains("ICU") || name.Contains("Intensive") => "ward-icu",
+                                    var name when name.Contains("Emergency") || name.Contains("ER") => "ward-emergency",
+                                    var name when name.Contains("Pediatric") || name.Contains("Children") => "ward-pediatric",
+                                    var name when name.Contains("Maternity") || name.Contains("Obstetric") => "ward-maternity",
+                                    var name when name.Contains("Surgery") || name.Contains("Surgical") => "ward-surgery",
+                                    _ => "ward-general"
+                                };
+                            }
+
+                            var statusClass = bed.IsOccupied ? "bed-occupied" : $"bed-available {wardColor}";
+
+                            <div class="col-4 mb-3 bed-item" data-ward-id="@bed.WardId">
+                                <div class="bed-card @statusClass">
+                                    <input class="form-check-input bed-radio"
+                                           type="radio"
+                                           name="BedId"
+                                           id="bed_@bed.BedId"
+                                           value="@bed.BedId"
+                                           @(bed.IsOccupied ? "disabled" : "") />
+                                    <label class="form-check-label" for="bed_@bed.BedId">
+                                        <div class="bed-name">@bed.Name</div>
+                                        <div class="bed-ward">@bed.Ward?.Name</div>
+                                    </label>
+                                    @if (bed.IsOccupied)
+                                    {
+                                        <span class="bed-status-badge">Occupied</span>
+                                    }
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <!-- Medical History -->
+            <div class="card-custom border-secondary">
+                <div class="card-header-custom bg-secondary text-white">
+                    <i class="bi bi-clipboard2-pulse"></i> Medical History
+                </div>
+                <div class="card-body-custom">
+                    <!-- Allergies -->
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Do you have allergies?</label><br />
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio"
+                                   name="medicalHistory.HasAllergies" value="true" />
+                            <label class="form-check-label">Yes</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio"
+                                   name="medicalHistory.HasAllergies" value="false" checked />
+                            <label class="form-check-label">No</label>
+                        </div>
+                        <div class="mt-2">
+                            <label for="AllergyDetails">Allergy details</label>
+                            <input class="form-control" name="medicalHistory.AllergyDetails" id="AllergyDetails" />
+                        </div>
+                    </div>
+
+                    <!-- Chronic Illness -->
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Do you have any chronic illness?</label><br />
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio"
+                                   name="medicalHistory.HasChronicIllness" value="true" />
+                            <label class="form-check-label">Yes</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio"
+                                   name="medicalHistory.HasChronicIllness" value="false" checked />
+                            <label class="form-check-label">No</label>
+                        </div>
+                        <div class="mt-2">
+                            <label for="ChronicIllnessDetails">Details (if any)</label>
+                            <input class="form-control" name="medicalHistory.ChronicIllnessDetails" id="ChronicIllnessDetails" />
+                        </div>
+                    </div>
+
+                    <!-- Pregnancy -->
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Are you currently pregnant?</label><br />
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio"
+                                   name="medicalHistory.IsPregnant" value="true" />
+                            <label class="form-check-label">Yes</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio"
+                                   name="medicalHistory.IsPregnant" value="false" checked />
+                            <label class="form-check-label">No</label>
+                        </div>
+                    </div>
+
+                    <!-- Contraceptives -->
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Do you use contraceptives?</label><br />
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio"
+                                   name="medicalHistory.UsesContraceptives" value="true" />
+                            <label class="form-check-label">Yes</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio"
+                                   name="medicalHistory.UsesContraceptives" value="false" checked />
+                            <label class="form-check-label">No</label>
+                        </div>
+                    </div>
+
+                    <!-- Smoking -->
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Do you smoke?</label><br />
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio"
+                                   name="medicalHistory.Smokes" value="true" />
+                            <label class="form-check-label">Yes</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio"
+                                   name="medicalHistory.Smokes" value="false" checked />
+                            <label class="form-check-label">No</label>
+                        </div>
+                    </div>
+
+                    <!-- Alcohol -->
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Do you drink alcohol?</label><br />
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio"
+                                   name="medicalHistory.DrinksAlcohol" value="true" />
+                            <label class="form-check-label">Yes</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio"
+                                   name="medicalHistory.DrinksAlcohol" value="false" checked />
+                            <label class="form-check-label">No</label>
+                        </div>
+                    </div>
+
+                    <!-- Family History -->
+                    <div class="mb-3">
+                        <h6 class="fw-bold">Family History</h6>
+
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox"
+                                   name="medicalHistory.FamilyHeartDisease" value="true">
+                            <label class="form-check-label">Heart Disease</label>
+                        </div>
+
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox"
+                                   name="medicalHistory.FamilyDiabetes" value="true">
+                            <label class="form-check-label">Diabetes</label>
+                        </div>
+
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox"
+                                   name="medicalHistory.FamilyCancer" value="true">
+                            <label class="form-check-label">Cancer</label>
+                        </div>
+                    </div>
+
+                    <!-- Other Notes -->
+                    <div class="mb-3">
+                        <label for="OtherNotes" class="fw-bold">Additional notes</label>
+                        <textarea class="form-control"
+                                  name="medicalHistory.OtherNotes"
+                                  id="OtherNotes"
+                                  rows="3"
+                                  placeholder="Any other medical information..."></textarea>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="mt-3">
+        <button type="submit" class="btn btn-success-custom">
+            <i class="bi bi-check-circle"></i> Confirm Admission
+        </button>
+        <a asp-action="Index" class="btn btn-secondary-custom">
+            <i class="bi bi-x-circle"></i> Cancel
+        </a>
+    </div>
+</form>
+
+@section Styles {
+    <style>
+        .fieldset-custom {
+            background: #efefef;
+            border: 2px solid #d0d0d0 !important;
+            border-radius: 10px;
+        }
+
+            .fieldset-custom legend {
+                color: #8B1538;
+                font-weight: 600;
+                font-size: 1.1rem;
+            }
+
+        .card-custom {
+            background: #efefef;
+            border: 2px solid #d0d0d0;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .card-header-custom {
+            padding: 1rem 1.25rem;
+            font-weight: 600;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+            .card-header-custom.bg-success {
+                background: linear-gradient(135deg, #16a34a 0%, #4ade80 100%) !important;
+            }
+
+            .card-header-custom.bg-secondary {
+                background: linear-gradient(135deg, #6c757d 0%, #adb5bd 100%) !important;
+            }
+
+        .card-body-custom {
+            padding: 1.25rem;
+            background: #fafafa;
+        }
+
+        .bed-instruction {
+            background: #e0f2fe;
+            border: 1px solid #99d6f5;
+            padding: 0.75rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+            color: #0c4a6e;
+        }
+
+        .bed-card {
+            border: 2px solid;
+            border-radius: 10px;
+            padding: 0.75rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            min-height: 90px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+            .bed-card input[type="radio"] {
+                position: absolute;
+                top: 8px;
+                right: 8px;
+            }
+
+            .bed-card label {
+                cursor: pointer;
+                width: 100%;
+                margin: 0;
+            }
+
+        .bed-name {
+            font-weight: 600;
+            font-size: 1rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .bed-ward {
+            font-size: 0.75rem;
+            opacity: 0.8;
+        }
+
+        .bed-status-badge {
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            font-size: 0.7rem;
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+        }
+
+        /* Ward Color Coding */
+        .ward-icu {
+            background: #fee2e2;
+            border-color: #fca5a5;
+            color: #991b1b;
+        }
+
+            .ward-icu:hover {
+                background: #fecaca;
+                box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
+            }
+
+        .ward-emergency {
+            background: #ffedd5;
+            border-color: #fdba74;
+            color: #9a3412;
+        }
+
+            .ward-emergency:hover {
+                background: #fed7aa;
+                box-shadow: 0 4px 12px rgba(234, 88, 12, 0.3);
+            }
+
+        .ward-pediatric {
+            background: #ddd6fe;
+            border-color: #c4b5fd;
+            color: #5b21b6;
+        }
+
+            .ward-pediatric:hover {
+                background: #c4b5fd;
+                box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+            }
+
+        .ward-maternity {
+            background: #fce7f3;
+            border-color: #fbcfe8;
+            color: #9f1239;
+        }
+
+            .ward-maternity:hover {
+                background: #fbcfe8;
+                box-shadow: 0 4px 12px rgba(236, 72, 153, 0.3);
+            }
+
+        .ward-surgery {
+            background: #e0f2fe;
+            border-color: #7dd3fc;
+            color: #075985;
+        }
+
+            .ward-surgery:hover {
+                background: #bae6fd;
+                box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3);
+            }
+
+        .ward-general {
+            background: #dcfce7;
+            border-color: #86efac;
+            color: #166534;
+        }
+
+            .ward-general:hover {
+                background: #bbf7d0;
+                box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
+            }
+
+        .bed-occupied {
+            background: #e5e5e5;
+            border-color: #b0b0b0;
+            color: #666;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        .bed-card input[type="radio"]:checked + label {
+            font-weight: 700;
+        }
+
+        .bed-card:has(input[type="radio"]:checked) {
+            transform: scale(1.05);
+            box-shadow: 0 6px 20px rgba(139, 21, 56, 0.4);
+            border-width: 3px;
+        }
+
+        .btn-success-custom {
+            background: linear-gradient(135deg, #16a34a 0%, #4ade80 100%);
+            color: white;
+            border: none;
+            padding: 0.6rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+            .btn-success-custom:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 12px rgba(22, 163, 74, 0.4);
+                color: white;
+            }
+
+        .btn-secondary-custom {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 0.6rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+            .btn-secondary-custom:hover {
+                background: #5a6268;
+                transform: translateY(-2px);
+                box-shadow: 0 4px 12px rgba(108, 117, 125, 0.3);
+                color: white;
+            }
+
+        .form-control, .form-select {
+            border: 1px solid #d0d0d0;
+            border-radius: 6px;
+        }
+
+            .form-control:focus, .form-select:focus {
+                border-color: #8B1538;
+                box-shadow: 0 0 0 0.2rem rgba(139, 21, 56, 0.15);
+            }
+
+        @@media (max-width: 768px) {
+            .bed-item {
+                flex: 0 0 50%;
+                max-width: 50%;
+            }
+        }
+    </style>
+}
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        function filterBedsByWard() {
+            const wardSelect = document.querySelector('.ward-select');
+            const selectedWardId = wardSelect.value;
+            const bedItems = document.querySelectorAll('.bed-item');
+
+            bedItems.forEach(item => {
+                if (selectedWardId === '' || item.getAttribute('data-ward-id') === selectedWardId) {
+                    item.style.display = 'block';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            filterBedsByWard();
+        });
+    </script>
+}

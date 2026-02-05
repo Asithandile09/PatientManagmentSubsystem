@@ -1,0 +1,135 @@
+﻿@model PatientManagmentSubsystem.Models.Patient
+
+@{
+    ViewData["Title"] = "Edit Patient Information";
+}
+
+<div class="container py-4">
+    <div class="card shadow-sm border-0">
+        <div class="card-header bg-success text-white">
+            <h4 class="mb-0"><i class="fas fa-user-edit me-2"></i>Edit Patient Information</h4>
+        </div>
+        <div class="card-body">
+            <form id="editPatientForm" asp-action="Edit" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" asp-for="PatientId" />
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                <div class="row g-3">
+                    <!-- Basic Info -->
+                    <div class="col-md-6">
+                        <label asp-for="FirstName" class="form-label"></label>
+                        <input asp-for="FirstName" class="form-control" />
+                        <span asp-validation-for="FirstName" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="LastName" class="form-label"></label>
+                        <input asp-for="LastName" class="form-control" />
+                        <span asp-validation-for="LastName" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="DOB" class="form-label"></label>
+                        <input asp-for="DOB" type="date" class="form-control" />
+                        <span asp-validation-for="DOB" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="Gender" class="form-label"></label>
+                        <select asp-for="Gender" class="form-select">
+                            <option value="">Select Gender</option>
+                            <option>Male</option>
+                            <option>Female</option>
+                            <option>Other</option>
+                        </select>
+                        <span asp-validation-for="Gender" class="text-danger"></span>
+                    </div>
+
+                    <!-- Contact -->
+                    <div class="col-md-6">
+                        <label asp-for="Phone" class="form-label"></label>
+                        <input asp-for="Phone" class="form-control" />
+                        <span asp-validation-for="Phone" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="Email" class="form-label"></label>
+                        <input asp-for="Email" class="form-control" />
+                        <span asp-validation-for="Email" class="text-danger"></span>
+                    </div>
+
+                    <!-- Assignment -->
+                    <div class="col-md-6">
+                        <label asp-for="DoctorId" class="form-label">Assigned Doctor</label>
+                        <select asp-for="DoctorId" class="form-select" asp-items="ViewBag.Doctors"></select>
+                        <span asp-validation-for="DoctorId" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="WardId" class="form-label">Current Ward</label>
+                        <select asp-for="WardId" class="form-select" asp-items="ViewBag.Wards"></select>
+                        <span asp-validation-for="WardId" class="text-danger"></span>
+                    </div>
+
+                    <!-- Medication -->
+                    <div class="col-md-6">
+                        <label asp-for="IsTakingMedication" class="form-label"></label>
+                        <select asp-for="IsTakingMedication" class="form-select">
+                            <option value="true">Yes</option>
+                            <option value="false">No</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="MedicationName" class="form-label">Medication Details</label>
+                        <input asp-for="MedicationName" class="form-control" />
+                        <span asp-validation-for="MedicationName" class="text-danger"></span>
+                    </div>
+
+                    <!-- Status -->
+                    <div class="col-md-6">
+                        <label class="form-label">Active Status</label>
+                        <select asp-for="IsActive" class="form-select">
+                            <option value="true">Active (Admitted)</option>
+                            <option value="false">Discharged</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="DischargeDate" class="form-label"></label>
+                        <input asp-for="DischargeDate" type="date" class="form-control" />
+                        <span asp-validation-for="DischargeDate" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="mt-4 d-flex justify-content-end gap-2">
+                    <button type="submit" class="btn btn-success shadow-sm">
+                        <i class="fas fa-save me-1"></i> Save Changes
+                    </button>
+                    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        // AJAX submit to avoid full page refresh
+        document.getElementById('editPatientForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+            const form = this;
+            const data = new FormData(form);
+
+            fetch(form.action, {
+                method: 'POST',
+                body: data,
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            })
+            .then(resp => {
+                if (resp.ok) {
+                    // You can redirect or show a success toast
+                    window.location.href = '@Url.Action("Index")';
+                } else {
+                    alert('Error updating patient information.');
+                }
+            });
+        });
+    </script>
+}

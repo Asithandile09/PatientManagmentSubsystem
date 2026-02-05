@@ -1,0 +1,34 @@
+﻿@model PatientManagmentSubsystem.Models.Bed
+
+@{
+    ViewData["Title"] = "Edit Bed";
+}
+
+<h2 class="mt-4 mb-3">✏️ Edit Bed</h2>
+
+<form asp-action="Edit">
+    <input type="hidden" asp-for="BedId" />
+
+    <div class="mb-3">
+        <label asp-for="WardId" class="form-label">Ward</label>
+        <select asp-for="WardId" class="form-select" asp-items="ViewBag.WardId"></select>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="IsOccupied" class="form-label">Is Occupied?</label>
+        <select asp-for="IsOccupied" class="form-select">
+            <option value="false">No</option>
+            <option value="true">Yes</option>
+        </select>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="PatientId" class="form-label">Assign to Patient</label>
+        <select asp-for="PatientId" class="form-select" asp-items="ViewBag.PatientId">
+            <option value="">-- None --</option>
+        </select>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Update</button>
+    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+</form>

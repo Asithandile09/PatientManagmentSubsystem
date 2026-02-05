@@ -1,0 +1,133 @@
+﻿@model PatientManagmentSubsystem.Models.PatientMovement
+
+@{
+    ViewData["Title"] = "Log Patient Movement";
+}
+
+<h2 class="mb-4">Log Patient Movement</h2>
+
+<form asp-action="Create" method="post">
+    <div asp-validation-summary="ModelOnly" class="alert alert-danger mb-3"></div>
+
+    <!-- Patient Selection -->
+    <div class="mb-3">
+        <label asp-for="PatientId" class="form-label">Patient *</label>
+        <select asp-for="PatientId" class="form-select" asp-items="ViewBag.PatientId" required>
+            <option value="">-- Select Patient --</option>
+        </select>
+        <span asp-validation-for="PatientId" class="text-danger"></span>
+    </div>
+
+    <div class="row">
+        <!-- From Location -->
+        <div class="col-md-6 mb-3">
+            <label asp-for="FromLocation" class="form-label">From Location *</label>
+            <select asp-for="FromLocation" class="form-select" asp-items="ViewBag.Locations" required>
+                <option value="">-- Select Starting Location --</option>
+            </select>
+            <span asp-validation-for="FromLocation" class="text-danger"></span>
+        </div>
+
+        <!-- To Location -->
+        <div class="col-md-6 mb-3">
+            <label asp-for="ToLocation" class="form-label">To Location *</label>
+            <select asp-for="ToLocation" class="form-select" asp-items="ViewBag.Locations" required>
+                <option value="">-- Select Destination --</option>
+            </select>
+            <span asp-validation-for="ToLocation" class="text-danger"></span>
+        </div>
+    </div>
+
+    <!-- Ward and Bed Selection (Optional) -->
+    <div class="card mb-3">
+        <div class="card-header bg-info text-white">
+            <h6 class="mb-0">Ward Transfer (Optional)</h6>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <!-- Ward Selection -->
+                <div class="col-md-6 mb-3">
+                    <label asp-for="ToWardId" class="form-label">Transfer to Ward</label>
+                    <select asp-for="ToWardId" class="form-select" id="wardSelect" asp-items="ViewBag.Wards">
+                        <option value="">-- No Ward Change --</option>
+                    </select>
+                    <span asp-validation-for="ToWardId" class="text-danger"></span>
+                </div>
+
+                <!-- Bed Selection -->
+                <div class="col-md-6 mb-3">
+                    <label asp-for="ToBedId" class="form-label">Select Bed</label>
+                    <select asp-for="ToBedId" class="form-select" id="bedSelect" disabled>
+                        <option value="">-- Select Ward First --</option>
+                    </select>
+                    <span asp-validation-for="ToBedId" class="text-danger"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Movement Date & Time -->
+    <div class="mb-3">
+        <label asp-for="MovedAt" class="form-label">Movement Date & Time *</label>
+        <input asp-for="MovedAt" type="datetime-local" class="form-control" required />
+        <span asp-validation-for="MovedAt" class="text-danger"></span>
+        <div class="form-text">Movement time cannot be in the future</div>
+    </div>
+
+    <!-- Type & Notes -->
+    <div class="mb-3">
+        <label asp-for="Type" class="form-label">Movement Type</label>
+        <input asp-for="Type" class="form-control" placeholder="e.g., Transfer, Checkup, Ward Change" />
+        <span asp-validation-for="Type" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Notes" class="form-label">Notes</label>
+        <textarea asp-for="Notes" class="form-control" rows="3" placeholder="Additional details..."></textarea>
+        <span asp-validation-for="Notes" class="text-danger"></span>
+    </div>
+
+    <div class="d-flex gap-2">
+        <button type="submit" class="btn btn-success">
+            <i class="fas fa-save"></i> Log Movement
+        </button>
+        <a asp-action="Index" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Back to List
+        </a>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const wardSelect = document.getElementById("wardSelect");
+            const bedSelect = document.getElementById("bedSelect");
+
+            wardSelect.addEventListener("change", function () {
+                const wardId = this.value;
+
+                if (wardId) {
+                    bedSelect.disabled = false;
+
+                    fetch(`/PatientMovements/GetBedsByWard?wardId=${wardId}`)
+                        .then(response => response.json())
+                        .then(beds => {
+                            bedSelect.innerHTML = '<option value="">-- Select Bed --</option>';
+                            beds.forEach(bed => {
+                                bedSelect.innerHTML += `<option value="${bed.bedId}">${bed.name}</option>`;
+                            });
+                        })
+                        .catch(error => {
+                            console.error('Error loading beds:', error);
+                            bedSelect.innerHTML = '<option value="">Error loading beds</option>';
+                        });
+                } else {
+                    bedSelect.disabled = true;
+                    bedSelect.innerHTML = '<option value="">-- Select Ward First --</option>';
+                }
+            });
+        });
+    </script>
+}

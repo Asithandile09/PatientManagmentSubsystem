@@ -1,0 +1,39 @@
+﻿@model PatientManagmentSubsystem.Models.Ward
+
+@{
+    ViewData["Title"] = "Ward Details";
+}
+
+<h2>@Model.Name</h2>
+
+<ul class="list-group mb-3">
+    <li class="list-group-item"><strong>Available Beds:</strong> @Model.Beds!.Count(b => !b.IsOccupied)</li>
+</ul>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Patient</th>
+            <th>Doctor</th>
+            <th>Admission Date</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var bed in Model.Beds!.Where(b => b.IsOccupied && b.Patient != null))
+        {
+            var patient = bed.Patient!;
+            <tr>
+                <td>@patient.FullName</td>
+                <td>@(patient.Doctor != null ? $"{patient.Doctor.FirstName} {patient.Doctor.LastName}" : "N/A")</td>
+                <td>@patient.AdmissionDate.ToShortDateString()</td>
+                <td>
+                    <a asp-controller="Patient" asp-action="Details" asp-route-id="@patient.PatientId"
+                       class="btn btn-sm btn-outline-primary">View</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<a asp-action="Index" class="btn btn-secondary mt-3">Back to List</a>

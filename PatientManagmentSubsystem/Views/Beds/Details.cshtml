@@ -1,0 +1,19 @@
+﻿@model PatientManagmentSubsystem.Models.Bed
+
+@{
+    ViewData["Title"] = "Bed Details";
+}
+
+<h2 class="mt-4 mb-3">📋 Bed Details</h2>
+
+<div class="card">
+    <div class="card-body">
+        <p><strong>Bed ID:</strong> @Model.BedId</p>
+        <p><strong>Ward:</strong> @Model.Ward?.Name</p>
+        <p><strong>Is Occupied:</strong> @(Model.IsOccupied ? "Yes" : "No")</p>
+        <p><strong>Patient:</strong> @Model.Patient?.FirstName @Model.Patient?.LastName</p>
+    </div>
+</div>
+
+<a asp-action="Edit" asp-route-id="@Model.BedId" class="btn btn-warning mt-3">Edit</a>
+<a asp-action="Index" class="btn btn-secondary mt-3">Back to List</a>

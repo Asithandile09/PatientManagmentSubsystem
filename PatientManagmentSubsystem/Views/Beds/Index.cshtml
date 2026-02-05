@@ -1,0 +1,265 @@
+﻿@model IEnumerable<PatientManagmentSubsystem.Models.Bed>
+@{
+    ViewData["Title"] = "Bed Management";
+}
+
+<div class="beds-container">
+    <h2 class="section-title"><i class="bi bi-grid-3x3-gap-fill"></i> Bed Management</h2>
+    <p class="text-muted mb-4">Monitor beds, occupancy, and assigned patients</p>
+
+    <!-- Quick Action -->
+    <div class="mb-4 text-end">
+        <a href="@Url.Action("Create")" class="btn btn-primary btn-add">
+            <i class="bi bi-plus-circle"></i> Add New Bed
+        </a>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-3">
+            <div class="stat-card total">
+                <h6>Total Beds</h6>
+                <div class="stat-value">@Model.Count()</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card available">
+                <h6>Available</h6>
+                <div class="stat-value">@Model.Count(b => !b.IsOccupied)</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card occupied">
+                <h6>Occupied</h6>
+                <div class="stat-value">@Model.Count(b => b.IsOccupied)</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card rate">
+                <h6>Occupancy Rate</h6>
+                <div class="stat-value">
+                    @(Model.Any() ? Math.Round((double)Model.Count(b => b.IsOccupied) / Model.Count() * 100, 1) : 0)%
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Beds Table -->
+    <div class="card shadow-sm">
+        <div class="card-header bg-light">
+            <h5 class="mb-0">All Beds</h5>
+        </div>
+        <div class="card-body p-0">
+            @if (Model.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Bed Name</th>
+                                <th>Ward</th>
+                                <th>Status</th>
+                                <th>Patient</th>
+                                <th class="text-center">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var bed in Model.OrderBy(b => b.Ward.Name).ThenBy(b => b.Name))
+                            {
+                                <tr>
+                                    <td class="fw-semibold">@bed.Name</td>
+                                    <td>
+                                        <span class="badge ward-badge @(bed.Ward?.Name?.Replace(" ", "").ToLower())">
+                                            @bed.Ward?.Name
+                                        </span>
+                                    </td>
+                                    <td>
+                                        @if (bed.IsOccupied)
+                                        {
+                                            <span class="badge status-occupied">Occupied</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge status-available">Available</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (bed.Patient != null)
+                                        {
+                                            <a href="@Url.Action("Details", "Patient", new { id = bed.PatientId })" class="link-patient">
+                                                @bed.Patient.FirstName @bed.Patient.LastName
+                                            </a>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">No patient</span>
+                                        }
+                                    </td>
+                                    <td class="text-center">
+                                        <a href="@Url.Action("Details", new { id = bed.BedId })" class="btn btn-sm btn-outline-primary me-1" title="View">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                        <a href="@Url.Action("Edit", new { id = bed.BedId })" class="btn btn-sm btn-outline-warning me-1" title="Edit">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                        @if (!bed.IsOccupied)
+                                        {
+                                            <a href="@Url.Action("Delete", new { id = bed.BedId })"
+                                               class="btn btn-sm btn-outline-danger"
+                                               onclick="return confirm('Delete this bed?')" title="Delete">
+                                                <i class="bi bi-trash"></i>
+                                            </a>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="p-4 text-center text-muted">
+                    <i class="bi bi-info-circle"></i> No beds have been added yet.
+                    <a href="@Url.Action("Create")" class="alert-link">Add your first bed</a>.
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <style>
+        .beds-container {
+            background: #ffffff;
+            border: 1px solid #e9ecef;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .section-title {
+            color: #2c3e50;
+            font-weight: 600;
+            font-size: 1.6rem;
+            margin-bottom: 1rem;
+            position: relative;
+        }
+
+            .section-title::after {
+                content: '';
+                position: absolute;
+                bottom: -6px;
+                left: 0;
+                width: 40px;
+                height: 3px;
+                background: #8B1538;
+                border-radius: 2px;
+            }
+
+        /* Stat Cards */
+        .stat-card {
+            color: #fff;
+            border-radius: 14px;
+            padding: 1.5rem;
+            text-align: center;
+            font-weight: 600;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+        }
+
+            .stat-card h6 {
+                font-size: 0.95rem;
+                margin-bottom: .4rem;
+                opacity: 0.9;
+            }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+        }
+
+        .stat-card.total {
+            background: linear-gradient(135deg, #8B1538 0%, #b23a5e 100%);
+        }
+
+        .stat-card.available {
+            background: linear-gradient(135deg, #16a34a 0%, #4ade80 100%);
+        }
+
+        .stat-card.occupied {
+            background: linear-gradient(135deg, #dc2626 0%, #f87171 100%);
+        }
+
+        .stat-card.rate {
+            background: linear-gradient(135deg, #4A90A4 0%, #7bc3d1 100%);
+        }
+
+        /* Status badges */
+        .badge {
+            font-size: .8rem;
+            padding: .45rem .7rem;
+            border-radius: .5rem;
+            font-weight: 600;
+        }
+
+        .status-available {
+            background: #e6f4ea;
+            color: #16a34a;
+        }
+
+        .status-occupied {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+
+        /* Ward colour-coding */
+        .ward-badge.generalward {
+            background: #f0f9ff;
+            color: #0369a1;
+        }
+
+        .ward-badge.icu {
+            background: #fff1f2;
+            color: #be123c;
+        }
+
+        .ward-badge.emergency {
+            background: #fef2f2;
+            color: #dc2626;
+        }
+        /* BRIGHTER pediatrics colour */
+        .ward-badge.pediatrics {
+            background: #d1fae5; /* brighter mint green */
+            color: #047857; /* deep teal text */
+            border: 1px solid #10b981;
+        }
+
+        .ward-badge.other {
+            background: #f1f5f9;
+            color: #475569;
+        }
+
+        .link-patient {
+            color: #8B1538;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+            .link-patient:hover {
+                color: #4A90A4;
+            }
+
+        /* Buttons */
+        .btn-add,
+        .btn-primary {
+            background-color: #8B1538;
+            border-color: #8B1538;
+        }
+
+            .btn-add:hover,
+            .btn-primary:hover {
+                background-color: #a3234a;
+                border-color: #a3234a;
+            }
+    </style>
+}

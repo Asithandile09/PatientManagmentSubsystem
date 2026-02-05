@@ -1,0 +1,22 @@
+﻿@model PatientManagmentSubsystem.Models.Patient
+
+@{
+    ViewData["Title"] = "Discharge Patient";
+}
+
+<h2>Discharge Confirmation</h2>
+<p>You're about to discharge this patient:</p>
+
+<dl class="row">
+    <dt class="col-sm-3">Full Name</dt>
+    <dd class="col-sm-9">@Model.FirstName @Model.LastName</dd>
+
+    <dt class="col-sm-3">Ward</dt>
+    <dd class="col-sm-9">@Model.Ward?.Name</dd>
+</dl>
+
+<form asp-action="Delete">
+    <input type="hidden" asp-for="PatientId" />
+    <button type="submit" class="btn btn-danger">Confirm Discharge (Hard Delete)</button>
+    <a href="@Url.Action("Index")" class="btn btn-secondary">Cancel</a>
+</form>

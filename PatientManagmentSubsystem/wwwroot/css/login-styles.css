@@ -1,0 +1,262 @@
+﻿/* 
+   
+   Then reference it in your Identity/Account/Login.cshtml page by adding:
+   <link rel="stylesheet" href="~/css/login-styles.css" />
+*/
+
+/* Reset and Base Styles */
+.login-page-wrapper {
+    background: linear-gradient(135deg, #8B1538 0%, #5a0e24 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+}
+
+    /* Animated background elements */
+    .login-page-wrapper::before {
+        content: '';
+        position: absolute;
+        width: 500px;
+        height: 500px;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 50%;
+        top: -250px;
+        right: -250px;
+        animation: float 6s ease-in-out infinite;
+    }
+
+    .login-page-wrapper::after {
+        content: '';
+        position: absolute;
+        width: 400px;
+        height: 400px;
+        background: rgba(255, 255, 255, 0.03);
+        border-radius: 50%;
+        bottom: -200px;
+        left: -200px;
+        animation: float 8s ease-in-out infinite reverse;
+    }
+
+@keyframes float {
+    0%, 100% {
+        transform: translateY(0px);
+    }
+
+    50% {
+        transform: translateY(-20px);
+    }
+}
+
+/* Login Card */
+.login-card-container {
+    position: relative;
+    z-index: 10;
+    width: 100%;
+    max-width: 450px;
+}
+
+.login-card {
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    overflow: hidden;
+}
+
+/* Login Header */
+.login-header {
+    background: linear-gradient(135deg, #8B1538 0%, #a61c45 100%);
+    padding: 3rem 2rem 2.5rem;
+    text-align: center;
+    color: white;
+}
+
+.login-header-icon {
+    width: 80px;
+    height: 80px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.5rem;
+    backdrop-filter: blur(10px);
+}
+
+    .login-header-icon i {
+        font-size: 2.5rem;
+        color: white;
+    }
+
+.login-header h1 {
+    font-size: 1.75rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    color: white;
+}
+
+.login-header p {
+    font-size: 0.95rem;
+    opacity: 0.9;
+    margin: 0;
+    color: white;
+}
+
+/* Login Body */
+.login-body {
+    padding: 2.5rem 2rem;
+}
+
+    /* Form Controls */
+    .login-body .form-floating {
+        margin-bottom: 1.25rem;
+    }
+
+        .login-body .form-floating label {
+            color: #6b7280;
+        }
+
+    .login-body .form-control {
+        border: 2px solid #e5e7eb;
+        border-radius: 10px;
+        padding: 0.75rem 1rem;
+        font-size: 0.95rem;
+        transition: all 0.3s ease;
+    }
+
+        .login-body .form-control:focus {
+            border-color: #8B1538;
+            box-shadow: 0 0 0 0.2rem rgba(139, 21, 56, 0.1);
+        }
+
+    /* Remember Me Checkbox */
+    .login-body .form-check {
+        margin-bottom: 1.5rem;
+    }
+
+    .login-body .form-check-input:checked {
+        background-color: #8B1538;
+        border-color: #8B1538;
+    }
+
+    .login-body .form-check-label {
+        color: #4b5563;
+        font-size: 0.9rem;
+    }
+
+/* Login Button */
+.btn-login-primary {
+    width: 100%;
+    background: linear-gradient(135deg, #8B1538 0%, #a61c45 100%);
+    border: none;
+    color: white !important;
+    padding: 0.875rem;
+    font-size: 1rem;
+    font-weight: 600;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(139, 21, 56, 0.3);
+}
+
+    .btn-login-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(139, 21, 56, 0.4);
+        background: linear-gradient(135deg, #a61c45 0%, #8B1538 100%);
+    }
+
+    .btn-login-primary:active {
+        transform: translateY(0);
+    }
+
+/* Validation Errors */
+.validation-summary-errors {
+    background: #fee2e2;
+    border: 1px solid #fecaca;
+    border-radius: 10px;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+    .validation-summary-errors ul {
+        margin: 0;
+        padding-left: 1.25rem;
+        color: #991b1b;
+        list-style: none;
+    }
+
+    .validation-summary-errors li::before {
+        content: "• ";
+        color: #dc2626;
+        font-weight: bold;
+        margin-right: 0.5rem;
+    }
+
+.text-danger {
+    color: #dc2626 !important;
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+}
+
+/* Links */
+.login-body a {
+    color: #8B1538;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+    .login-body a:hover {
+        color: #a61c45;
+        text-decoration: underline;
+    }
+
+/* Divider */
+.login-divider {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    margin: 1.5rem 0;
+    color: #9ca3af;
+    font-size: 0.875rem;
+}
+
+    .login-divider::before,
+    .login-divider::after {
+        content: '';
+        flex: 1;
+        border-bottom: 1px solid #e5e7eb;
+    }
+
+    .login-divider span {
+        padding: 0 1rem;
+    }
+
+/* Register Link */
+.register-link-section {
+    text-align: center;
+    margin-top: 1.5rem;
+    color: #6b7280;
+    font-size: 0.9rem;
+}
+
+    .register-link-section a {
+        color: #8B1538;
+        font-weight: 600;
+    }
+
+/* Responsive */
+@media (max-width: 576px) {
+    .login-header {
+        padding: 2rem 1.5rem;
+    }
+
+    .login-body {
+        padding: 2rem 1.5rem;
+    }
+
+    .login-header h1 {
+        font-size: 1.5rem;
+    }
+}

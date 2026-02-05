@@ -1,0 +1,170 @@
+﻿@* Views/Shared/_Layout.cshtml *@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>@ViewData["Title"] - Ward Management System</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+    @RenderSection("Styles", required: false)
+
+    <style>
+        /* Reset */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* Background with overlay */
+        body {
+            background-image: url('/images/medical-subjects.jpg');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            background-repeat: no-repeat;
+            min-height: 100vh;
+            font-family: 'Roboto', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #2c3e50;
+            position: relative;
+        }
+
+            body::before {
+                content: '';
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(255, 255, 255, 0.80);
+                z-index: -1;
+            }
+
+        /* Navbar */
+        .navbar-medical {
+            background: #8B1538 !important; /* Maroon */
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
+            padding: 1rem 0;
+        }
+
+            .navbar-medical .navbar-brand {
+                color: #fff !important;
+                font-weight: 600;
+                font-size: 1.4rem;
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+            }
+
+                .navbar-medical .navbar-brand i {
+                    color: #fff;
+                    font-size: 1.6rem;
+                }
+
+            .navbar-medical .nav-link {
+                color: #f1f1f2 !important;
+                font-weight: 500;
+                padding: 0.6rem 1rem !important;
+                border-radius: 8px;
+                margin: 0 2px;
+                transition: all 0.3s ease;
+                display: flex;
+                align-items: center;
+                gap: 0.4rem;
+            }
+
+                .navbar-medical .nav-link:hover,
+                .navbar-medical .nav-link.active {
+                    color: #fff !important;
+                    background: rgba(255, 255, 255, 0.15);
+                }
+
+        /* Main content container */
+        main.container {
+            background: rgba(248, 249, 250, 0.95);
+            border-radius: 12px;
+            padding: 2.5rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            margin-top: 2rem;
+            margin-bottom: 2rem;
+            border: 1px solid rgba(214, 214, 216, 0.5);
+        }
+
+        /* Section titles */
+        .section-title {
+            color: #2c3e50;
+            font-weight: 600;
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            position: relative;
+            padding-bottom: 0.5rem;
+        }
+
+            .section-title::after {
+                content: '';
+                position: absolute;
+                bottom: 0;
+                left: 0;
+                width: 40px;
+                height: 3px;
+                background: #fff;
+                border-radius: 2px;
+            }
+
+        @@media (max-width: 768px) {
+            main.container {
+                padding: 1.5rem;
+                margin-top: 1rem;
+            }
+
+            .navbar-medical .navbar-brand {
+                font-size: 1.2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    @if (ViewData["Title"]?.ToString() != "Login")
+    {
+        <header>
+            <nav class="navbar navbar-expand-lg navbar-medical">
+                <div class="container-fluid">
+                    <a class="navbar-brand" asp-controller="Home" asp-action="Dashboard">
+                        <i class="bi bi-hospital"></i>
+                        <span>Ward Management</span>
+                    </a>
+
+                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+
+                    <div class="collapse navbar-collapse" id="navbarNav">
+                        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                            <li class="nav-item"><a class="nav-link" asp-controller="Home" asp-action="Dashboard"><i class="bi bi-speedometer2"></i> Dashboard</a></li>
+                            <li class="nav-item"><a class="nav-link" asp-controller="Patient" asp-action="Index"><i class="bi bi-folder2-open"></i> Patients</a></li>
+                            <li class="nav-item"><a class="nav-link" asp-controller="Beds" asp-action="Index"><i class="bi bi-grid-3x3-gap-fill"></i> Beds</a></li>
+                            <li class="nav-item"><a class="nav-link" asp-controller="Patient" asp-action="RecycleBin"><i class="bi bi-archive-fill"></i> Discharged</a></li>
+                            <li class="nav-item"><a class="nav-link" asp-controller="Wards" asp-action="Index"><i class="bi bi-building"></i> Wards</a></li>
+                            <li class="nav-item"><a class="nav-link" asp-controller="PatientMovements" asp-action="Index"><i class="bi bi-arrows-move"></i> Movements</a></li>
+                        </ul>
+
+                        <partial name="_LoginPartial" />
+                    </div>
+                </div>
+            </nav>
+        </header>
+    }
+
+    <main class="container py-4">
+        @RenderBody()
+    </main>
+
+    @RenderSection("Scripts", required: false)
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

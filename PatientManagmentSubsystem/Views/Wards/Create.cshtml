@@ -1,0 +1,73 @@
+﻿@model PatientManagmentSubsystem.Models.Ward
+
+@{
+    ViewData["Title"] = "Create Ward";
+}
+
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="mb-0">Add New Ward</h2>
+        <a asp-action="Index" class="btn btn-outline-secondary">Back to Wards</a>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-header bg-maroon text-white">
+            <h5 class="mb-0">Ward Information</h5>
+        </div>
+        <div class="card-body">
+            <form asp-action="Create">
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                <div class="mb-3">
+                    <label asp-for="Name" class="form-label fw-semibold"></label>
+                    <input asp-for="Name" class="form-control" placeholder="Enter ward name" />
+                    <span asp-validation-for="Name" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="TotalBeds" class="form-label fw-semibold"></label>
+                    <input asp-for="TotalBeds" class="form-control" placeholder="Enter total number of beds" />
+                    <span asp-validation-for="TotalBeds" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="AvailableBeds" class="form-label fw-semibold"></label>
+                    <input asp-for="AvailableBeds" class="form-control" placeholder="Enter available beds" />
+                    <span asp-validation-for="AvailableBeds" class="text-danger"></span>
+                </div>
+
+                <div class="d-flex justify-content-end">
+                    <button type="submit" class="btn btn-maroon px-4">Create Ward</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}
+
+<style>
+    .bg-maroon {
+        background: linear-gradient(135deg, #8B1538, #B76E79);
+    }
+
+    .btn-maroon {
+        background: #8B1538;
+        color: #fff;
+        border: none;
+    }
+
+        .btn-maroon:hover {
+            background: #6e102d;
+            color: #fff;
+        }
+
+    .card {
+        border-radius: 12px;
+        overflow: hidden;
+    }
+</style>

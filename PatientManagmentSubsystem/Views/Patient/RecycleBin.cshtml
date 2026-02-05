@@ -1,0 +1,223 @@
+﻿@model IEnumerable<PatientManagmentSubsystem.Models.Patient>
+@{
+    ViewData["Title"] = "Discharged Patients";
+}
+
+<div class="page-header mb-4">
+    <div class="row align-items-center">
+        <div class="col-md-8">
+            <h2 class="page-title"><i class="bi bi-archive-fill"></i> Discharged Patients</h2>
+            <p class="page-subtitle">Archive of all patients who have been discharged</p>
+        </div>
+        <div class="col-md-4 text-end">
+            <a href="@Url.Action("Index", "Patient")" class="btn btn-add-patient">
+                <i class="bi bi-arrow-left-circle"></i> Back to Active
+            </a>
+        </div>
+    </div>
+</div>
+
+@if (Model != null && Model.Any())
+{
+    <!-- Quick stats -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-6">
+            <div class="stat-card discharged">
+                <i class="bi bi-box-arrow-right"></i>
+                <div>
+                    <h3>@Model.Count()</h3>
+                    <span>Total Discharged</span>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="stat-card avgstay">
+                <i class="bi bi-clock-history"></i>
+                <div>
+                    <h3>
+                        @{
+                            var avgStay = Model
+                            .Where(p => p.DischargeDate.HasValue)
+                            .Select(p => (p.DischargeDate.Value - p.AdmissionDate).Days)
+                            .DefaultIfEmpty(0)
+                            .Average();
+                            @Math.Round(avgStay, 1)
+                        }
+     days
+                    </h3>
+                    <span>Avg. Stay Duration</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Discharged Patients Table -->
+    <div class="card-custom shadow-sm">
+        <div class="card-header-custom">
+            <h5><i class="bi bi-table"></i> Discharged Patients List</h5>
+        </div>
+        <div class="table-responsive">
+            <table class="table align-middle">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Patient Name</th>
+                        <th>Gender</th>
+                        <th>Age</th>
+                        <th>Ward</th>
+                        <th>Admission Date</th>
+                        <th>Discharge Date</th>
+                        <th>Status</th>
+                        <th class="text-center">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var p in Model)
+                    {
+                        <tr>
+                            <td><strong>#@p.PatientId</strong></td>
+                            <td>@p.FirstName @p.LastName</td>
+                            <td>@p.Gender</td>
+                            <td>@((DateTime.Now - p.DOB).Days / 365) yrs</td>
+                            <td>@(p.Ward != null ? p.Ward.Name : "—")</td>
+                            <td>@p.AdmissionDate.ToString("MMM dd, yyyy")</td>
+                            <td>@p.DischargeDate?.ToString("MMM dd, yyyy")</td>
+                            <td><span class="badge status-discharged">Discharged</span></td>
+                            <td class="text-center">
+                                <a href="@Url.Action("Details", "Patient", new { id = p.PatientId })"
+                                   class="btn-action view" title="View Patient Folder">
+                                    <i class="bi bi-folder2"></i>
+                                </a>
+                                <form asp-action="Reactivate" method="post" class="d-inline">
+                                    <input type="hidden" name="id" value="@p.PatientId" />
+                                    <button type="submit" class="btn-action edit" title="Reactivate">
+                                        <i class="bi bi-arrow-counterclockwise"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}
+else
+{
+    <div class="alert alert-info shadow-sm">
+        <i class="bi bi-info-circle"></i> No discharged patients yet.
+    </div>
+}
+
+@section Styles {
+    <style>
+        /* Header */
+        .page-title {
+            font-weight: 700;
+            color: #2c3e50;
+        }
+
+            .page-title i {
+                color: #8B1538;
+            }
+
+        /* Button */
+        .btn-add-patient {
+            background: linear-gradient(135deg, #6c757d, #adb5bd);
+            border: none;
+            color: #fff;
+            padding: 0.6rem 1.3rem;
+            border-radius: 8px;
+            font-weight: 500;
+        }
+
+            .btn-add-patient:hover {
+                opacity: 0.9;
+            }
+
+        /* Stat cards */
+        .stat-card {
+            border-radius: 12px;
+            padding: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            color: #fff;
+        }
+
+            .stat-card i {
+                font-size: 2rem;
+            }
+
+            .stat-card h3 {
+                margin: 0;
+                font-weight: 700;
+            }
+
+            .stat-card.discharged {
+                background: linear-gradient(135deg, #6c757d, #adb5bd);
+            }
+
+            .stat-card.avgstay {
+                background: linear-gradient(135deg, #4A90A4, #7BB3C4);
+            }
+
+        /* Card */
+        .card-custom {
+            border-radius: 12px;
+            background: #fdfdfd;
+            border: 1px solid #e9ecef;
+        }
+
+        .card-header-custom {
+            background: linear-gradient(135deg, #8B1538, #B76E79);
+            color: white;
+            padding: 0.8rem 1.2rem;
+            border-top-left-radius: 12px;
+            border-top-right-radius: 12px;
+        }
+
+        /* Table */
+        .table thead {
+            background: #f8f9fa;
+        }
+
+            .table thead th {
+                color: #2c3e50;
+                text-transform: uppercase;
+                font-size: 0.85rem;
+            }
+
+        .badge.status-discharged {
+            background: #6c757d;
+            color: #fff;
+        }
+
+        /* Action buttons */
+        .btn-action {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            border: none;
+            margin: 0 2px;
+            cursor: pointer;
+        }
+
+            .btn-action.view {
+                background: #e7f1ff;
+                color: #0d6efd;
+            }
+
+            .btn-action.edit {
+                background: #f0fdf4;
+                color: #198754;
+            }
+
+            .btn-action:hover {
+                opacity: 0.85;
+            }
+    </style>
+}

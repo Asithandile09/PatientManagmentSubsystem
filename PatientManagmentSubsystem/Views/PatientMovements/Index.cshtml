@@ -1,0 +1,378 @@
+﻿@model IEnumerable<PatientManagmentSubsystem.Models.PatientMovement>
+@{
+    ViewData["Title"] = "Patient Movements";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    // Quick stats
+    var total = Model.Count();
+    var todayMovements = Model.Count(m => m.MovedAt.Date == DateTime.Today);
+    var emergency = Model.Count(m => m.FromLocation.Contains("Emergency", StringComparison.OrdinalIgnoreCase)
+                                  || m.ToLocation.Contains("Emergency", StringComparison.OrdinalIgnoreCase));
+    var theatre = Model.Count(m => m.ToLocation.Contains("Theatre", StringComparison.OrdinalIgnoreCase));
+}
+
+<div class="container-fluid px-4 py-4">
+    <!-- Header Section -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="page-title mb-1">Patient Movements</h2>
+            <p class="text-muted mb-0">Track patient transfers and location changes</p>
+        </div>
+        <div>
+            <a href="@Url.Action("Create")" class="btn btn-primary">
+                <i class="bi bi-plus-circle me-2"></i>Log New Movement
+            </a>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row g-3 mb-4">
+        <div class="col-lg-3 col-md-6">
+            <div class="stats-card stats-primary">
+                <div class="stats-label">Total Movements</div>
+                <div class="stats-value">@total</div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6">
+            <div class="stats-card stats-success">
+                <div class="stats-label">Today's Movements</div>
+                <div class="stats-value">@todayMovements</div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6">
+            <div class="stats-card stats-warning">
+                <div class="stats-label">Emergency Transfers</div>
+                <div class="stats-value">@emergency</div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6">
+            <div class="stats-card stats-info">
+                <div class="stats-label">Theatre / Procedure</div>
+                <div class="stats-value">@theatre</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Movement History Section -->
+    <div class="card shadow-sm border-0">
+        <div class="card-header bg-white border-bottom py-3">
+            <div class="d-flex justify-content-between align-items-center">
+                <h5 class="mb-0 fw-semibold">Movement History</h5>
+                <div class="search-box">
+                    <input type="text" id="searchInput" class="form-control form-control-sm"
+                           placeholder="Search movements...">
+                </div>
+            </div>
+        </div>
+        <div class="card-body p-0">
+            @if (Model.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0 movements-table">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Patient</th>
+                                <th>From Location</th>
+                                <th>To Location</th>
+                                <th>Movement Time</th>
+                                <th class="text-end">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var m in Model.OrderByDescending(x => x.MovedAt))
+                            {
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="patient-avatar me-3">
+                                                @if (m.Patient != null)
+                                                {
+                                                    var initials = (m.Patient.FirstName?.Substring(0, 1) ?? "") +
+                                                    (m.Patient.LastName?.Substring(0, 1) ?? "");
+                                                    <span>@initials</span>
+                                                }
+                                                else
+                                                {
+                                                    <span>?</span>
+                                                }
+                                            </div>
+                                            <div>
+                                                @if (m.Patient != null)
+                                                {
+                                                    <div class="fw-semibold">@m.Patient.FirstName @m.Patient.LastName</div>
+                                                    <small class="text-muted">ID: @m.PatientId</small>
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted">Unknown Patient</span>
+                                                }
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="location-badge badge-from">@m.FromLocation</span>
+                                    </td>
+                                    <td>
+                                        <span class="location-badge badge-to">@m.ToLocation</span>
+                                    </td>
+                                    <td>
+                                        <div class="fw-semibold">@m.MovedAt.ToString("MMM dd, yyyy")</div>
+                                        <small class="text-muted">@m.MovedAt.ToString("HH:mm")</small>
+                                    </td>
+                                    <td class="text-end">
+                                        <div class="action-buttons">
+                                            <a href="@Url.Action("Details", new { id = m.PatientMovementId })"
+                                               class="btn btn-sm btn-action btn-info" title="View Details">
+                                                <i class="bi bi-eye"></i>
+                                            </a>
+                                            <a href="@Url.Action("Edit", new { id = m.PatientMovementId })"
+                                               class="btn btn-sm btn-action btn-warning" title="Edit">
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
+                                            <a href="@Url.Action("Delete", new { id = m.PatientMovementId })"
+                                               class="btn btn-sm btn-action btn-danger"
+                                               onclick="return confirm('Delete this movement record?')" title="Delete">
+                                                <i class="bi bi-trash"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="text-center py-5">
+                    <i class="bi bi-inbox" style="font-size: 4rem; color: #dee2e6;"></i>
+                    <p class="text-muted mt-3 mb-2">No patient movements recorded yet</p>
+                    <a href="@Url.Action("Create")" class="btn btn-primary btn-sm">
+                        <i class="bi bi-plus-circle me-1"></i>Log First Movement
+                    </a>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <style>
+        .page-title {
+            color: #2c3e50;
+            font-weight: 600;
+            font-size: 1.75rem;
+        }
+
+        /* Stats Cards */
+        .stats-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            border-left: 4px solid;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+            .stats-card:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            }
+
+        .stats-primary {
+            border-left-color: #8B1538;
+        }
+
+        .stats-success {
+            border-left-color: #16a34a;
+        }
+
+        .stats-warning {
+            border-left-color: #f59e0b;
+        }
+
+        .stats-info {
+            border-left-color: #0ea5e9;
+        }
+
+        .stats-label {
+            font-size: 0.875rem;
+            color: #6b7280;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+
+        .stats-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #1f2937;
+        }
+
+        /* Primary Button */
+        .btn-primary {
+            background-color: #8B1538;
+            border-color: #8B1538;
+            font-weight: 500;
+            padding: 0.5rem 1.25rem;
+        }
+
+            .btn-primary:hover {
+                background-color: #a61c45;
+                border-color: #a61c45;
+            }
+
+        /* Search Box */
+        .search-box {
+            width: 250px;
+        }
+
+            .search-box input {
+                border-radius: 8px;
+                border: 1px solid #e5e7eb;
+                padding: 0.5rem 1rem;
+            }
+
+                .search-box input:focus {
+                    border-color: #8B1538;
+                    box-shadow: 0 0 0 0.2rem rgba(139, 21, 56, 0.1);
+                }
+
+        /* Table Styles */
+        .movements-table {
+            font-size: 0.9rem;
+        }
+
+            .movements-table thead th {
+                font-weight: 600;
+                color: #4b5563;
+                border-bottom: 2px solid #e5e7eb;
+                padding: 1rem;
+                font-size: 0.875rem;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+            }
+
+            .movements-table tbody td {
+                padding: 1rem;
+                vertical-align: middle;
+                border-bottom: 1px solid #f3f4f6;
+            }
+
+            .movements-table tbody tr:hover {
+                background-color: #f9fafb;
+            }
+
+        /* Patient Avatar */
+        .patient-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #8B1538, #a61c45);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 0.875rem;
+            flex-shrink: 0;
+        }
+
+        /* Location Badges */
+        .location-badge {
+            display: inline-block;
+            padding: 0.35rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.813rem;
+            font-weight: 500;
+        }
+
+        .badge-from {
+            background-color: #f3f4f6;
+            color: #4b5563;
+        }
+
+        .badge-to {
+            background-color: #dcfce7;
+            color: #166534;
+        }
+
+        /* Action Buttons */
+        .action-buttons {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: flex-end;
+        }
+
+        .btn-action {
+            width: 32px;
+            height: 32px;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+            border: 1px solid;
+        }
+
+            .btn-action.btn-info {
+                background-color: #e0f2fe;
+                border-color: #bae6fd;
+                color: #0369a1;
+            }
+
+                .btn-action.btn-info:hover {
+                    background-color: #bae6fd;
+                }
+
+            .btn-action.btn-warning {
+                background-color: #fef3c7;
+                border-color: #fde68a;
+                color: #92400e;
+            }
+
+                .btn-action.btn-warning:hover {
+                    background-color: #fde68a;
+                }
+
+            .btn-action.btn-danger {
+                background-color: #fee2e2;
+                border-color: #fecaca;
+                color: #991b1b;
+            }
+
+                .btn-action.btn-danger:hover {
+                    background-color: #fecaca;
+                }
+
+        /* Card Styling */
+        .card {
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .card-header {
+            border-radius: 12px 12px 0 0 !important;
+        }
+    </style>
+}
+
+@section Scripts {
+    <script>
+        // Simple search functionality
+        document.getElementById('searchInput')?.addEventListener('keyup', function() {
+            const searchValue = this.value.toLowerCase();
+            const tableRows = document.querySelectorAll('.movements-table tbody tr');
+
+            tableRows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(searchValue) ? '' : 'none';
+            });
+        });
+
+        // Bootstrap tooltips
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[title]'));
+        tooltipTriggerList.map(function(el) {
+            return new bootstrap.Tooltip(el);
+        });
+    </script>
+}

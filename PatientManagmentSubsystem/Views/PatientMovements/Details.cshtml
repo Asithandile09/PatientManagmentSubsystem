@@ -1,0 +1,51 @@
+﻿@model PatientManagmentSubsystem.Models.PatientMovement
+@{
+    ViewData["Title"] = "Movement Details";
+}
+
+<div class="container mt-4">
+    <h2>Movement Details</h2>
+    <div class="card">
+        <div class="card-header">
+            <h4>Patient Movement Record</h4>
+        </div>
+        <div class="card-body">
+            <dl class="row">
+                <dt class="col-sm-3">Patient Name:</dt>
+                <dd class="col-sm-9">
+                    @if (Model.Patient != null)
+                    {
+                        @($"{Model.Patient.FirstName} {Model.Patient.LastName}")
+                    }
+                    else
+                    {
+                        <span class="text-muted">Patient information not available</span>
+                    }
+                </dd>
+
+                <dt class="col-sm-3">From Location:</dt>
+                <dd class="col-sm-9">@Model.FromLocation</dd>
+
+                <dt class="col-sm-3">To Location:</dt>
+                <dd class="col-sm-9">@Model.ToLocation</dd>
+
+                <dt class="col-sm-3">Movement Date:</dt>
+                <dd class="col-sm-9">@Model.MovedAt.ToString("yyyy-MM-dd HH:mm")</dd>
+
+
+            </dl>
+        </div>
+    </div>
+
+    <div class="mt-3">
+        <a asp-action="Edit" asp-route-id="@Model.PatientMovementId" class="btn btn-warning">
+            <i class="bi bi-pencil"></i> Edit Movement
+        </a>
+        <a asp-action="Delete" asp-route-id="@Model.PatientMovementId" class="btn btn-danger">
+            <i class="bi bi-trash"></i> Delete Movement
+        </a>
+        <a asp-action="Index" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> Back to List
+        </a>
+    </div>
+</div>

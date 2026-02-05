@@ -1,0 +1,52 @@
+﻿@{
+    ViewData["Title"] = "Home";
+}
+
+<div class="container mt-5">
+    <h2 class="mb-4 fw-bold text-primary">🏥 Welcome to the Ward Patient Management System</h2>
+
+    <p class="lead">Easily manage patient admissions, bed availability, and ward information in one place.</p>
+
+    <div class="row mt-4">
+        <div class="col-md-3">
+            <div class="card text-white bg-info mb-3 shadow-sm">
+                <div class="card-body text-center">
+                    <h5 class="card-title">👥 Active Patients</h5>
+                    <h3>@ViewData["PatientCount"]</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card text-white bg-secondary mb-3 shadow-sm">
+                <div class="card-body text-center">
+                    <h5 class="card-title">🛏️ Total Beds</h5>
+                    <h3>@ViewData["BedCount"]</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card text-white bg-danger mb-3 shadow-sm">
+                <div class="card-body text-center">
+                    <h5 class="card-title">🔴 Occupied Beds</h5>
+                    <h3>@ViewData["OccupiedBeds"]</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card text-white bg-success mb-3 shadow-sm">
+                <div class="card-body text-center">
+                    <h5 class="card-title">🟢 Available Beds</h5>
+                    <h3>@ViewData["AvailableBeds"]</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-4">
+        <a asp-controller="Patient" asp-action="Index" class="btn btn-primary me-2">Go to Patient Folder</a>
+        <a asp-controller="Beds" asp-action="Index" class="btn btn-outline-primary">Manage Beds</a>
+    </div>
+</div>

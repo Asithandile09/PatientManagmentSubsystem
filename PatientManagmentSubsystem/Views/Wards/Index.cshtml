@@ -1,0 +1,112 @@
+﻿@model IEnumerable<PatientManagmentSubsystem.Models.Ward>
+
+@{
+    ViewData["Title"] = "Hospital Wards";
+}
+
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="mb-0">Hospital Wards</h2>
+        <a asp-action="Create" class="btn btn-success shadow-sm">
+            Add Ward
+        </a>
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="text-center py-5">
+            <h5 class="text-muted">No wards have been created yet.</h5>
+            <p class="text-muted mb-3">Click “Add Ward” to create your first ward.</p>
+        </div>
+    }
+    else
+    {
+        <div class="row g-4">
+            @foreach (var ward in Model)
+            {
+                var available = ward.Beds.Count(b => !b.IsOccupied);
+                var total = ward.Beds.Count();
+                var colorClass = available == 0 ? "border-danger" : available < (total / 2) ? "border-warning" : "border-success";
+
+                <div class="col-md-6 col-lg-4">
+                    <div class="card shadow-sm h-100 border-3 @colorClass">
+                        <div class="card-header bg-white border-0 d-flex justify-content-between align-items-center">
+                            <h5 class="card-title mb-0 text-primary">@ward.Name</h5>
+                            <a asp-action="Details" asp-route-id="@ward.WardId"
+                               class="btn btn-sm btn-outline-primary">
+                                Details
+                            </a>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="fw-semibold text-muted">Total Beds</span>
+                                <span class="badge bg-primary fs-6">@total</span>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="fw-semibold text-muted">Available</span>
+                                <span class="badge @(available == 0 ? "bg-danger" : "bg-success") fs-6">
+                                    @available
+                                </span>
+                            </div>
+                        </div>
+                        <div class="card-footer bg-light d-flex justify-content-end">
+                            <a asp-action="Edit" asp-route-id="@ward.WardId"
+                               class="btn btn-sm btn-outline-warning me-2">
+                                Edit
+                            </a>
+                            <form asp-action="Delete" asp-route-id="@ward.WardId" method="post" class="d-inline"
+                                  onsubmit="return confirm('Are you sure you want to delete this ward?');">
+                                <button type="submit" class="btn btn-sm btn-outline-danger">
+                                    Delete
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+<style>
+    .card-title {
+        font-weight: 600;
+        color: #2c3e50;
+    }
+
+    .card.border-success {
+        border-color: #16a34a !important;
+    }
+
+    .card.border-warning {
+        border-color: #d4af37 !important;
+    }
+
+    .card.border-danger {
+        border-color: #8B1538 !important;
+    }
+
+    .badge.fs-6 {
+        font-size: 1rem;
+        padding: .5rem .8rem;
+    }
+
+    .btn-outline-primary, .btn-outline-warning, .btn-outline-danger {
+        transition: all 0.2s ease-in-out;
+    }
+
+        .btn-outline-primary:hover {
+            background: #4A90A4;
+            color: #fff;
+        }
+
+        .btn-outline-warning:hover {
+            background: #D4AF37;
+            color: #fff;
+        }
+
+        .btn-outline-danger:hover {
+            background: #8B1538;
+            color: #fff;
+        }
+</style>
