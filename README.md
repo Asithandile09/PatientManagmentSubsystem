@@ -39,6 +39,7 @@ This project demonstrates a full-featured system for managing patient admissions
 ### New Admission
 ![New Admission](screenshots/new-admission.png)
 
+
 ---
 
 ## How to Run
